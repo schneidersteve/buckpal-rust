@@ -3,6 +3,9 @@ name = "domain"
 version = "0.0.1"
 edition = "2021"
 
+[lib]
+doctest = false
+
 [dependencies]
 num-bigint = "0.4"
 chrono = "0.4"

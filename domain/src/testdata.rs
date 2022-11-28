@@ -1,7 +1,7 @@
 use chrono::{Local, NaiveDateTime};
 
 use crate::{
-    account::{Account, AccountId},
+    account::{Account, AccountId, AccountImpl},
     activity_window::{Activity, ActivityId, ActivityWindow},
     money::Money,
 };
@@ -43,12 +43,12 @@ impl AccountBuilder {
         self
     }
 
-    pub fn build(self) -> Account {
-        Account::with_id(
+    pub fn build(self) -> Box<impl Account> {
+        Box::new(AccountImpl::with_id(
             self.account_id.unwrap(),
             self.baseline_balance.unwrap(),
             self.activity_window.unwrap(),
-        )
+        ))
     }
 }
 

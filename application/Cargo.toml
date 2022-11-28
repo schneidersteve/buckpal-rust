@@ -1,0 +1,14 @@
+[package]
+name = "application"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+doctest = false
+
+[dependencies]
+domain = { version = "0.0.1", path = "../domain" }
+chrono = "0.4"
+
+[dev-dependencies]
+mockall = "0.11"

@@ -65,6 +65,7 @@ impl Activity {
 /**
  * A window of account activities.
  */
+#[derive(Debug)]
 pub struct ActivityWindow {
     pub activities: Vec<Activity>,
 }
@@ -122,10 +123,9 @@ impl<'a> ActivityWindow {
 
 #[cfg(test)]
 mod tests {
-    use chrono::{NaiveDate, NaiveTime};
-
     use super::*;
     use crate::testdata::default_activity;
+    use chrono::{NaiveDate, NaiveTime};
 
     #[test]
     fn test_calculates_start_timestamp() {
@@ -153,18 +153,18 @@ mod tests {
         let account2 = AccountId(2);
         let window = ActivityWindow::new(vec![
             default_activity()
-                .with_source_account(account1)
-                .with_target_account(account2)
+                .with_source_account(account1.clone())
+                .with_target_account(account2.clone())
                 .with_money(Money::of(999))
                 .build(),
             default_activity()
-                .with_source_account(account1)
-                .with_target_account(account2)
+                .with_source_account(account1.clone())
+                .with_target_account(account2.clone())
                 .with_money(Money::of(1))
                 .build(),
             default_activity()
-                .with_source_account(account2)
-                .with_target_account(account1)
+                .with_source_account(account2.clone())
+                .with_target_account(account1.clone())
                 .with_money(Money::of(500))
                 .build(),
         ]);

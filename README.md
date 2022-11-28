@@ -7,6 +7,7 @@ Kotlin Version: https://github.com/schneidersteve/buckpal-kotlin
 ## Tech Stack
 
 * [Rust](https://www.rust-lang.org)
+* [Mockall](https://github.com/asomers/mockall)
 * [rust-analyzer](https://rust-analyzer.github.io)
 * [Visual Studio Code](https://code.visualstudio.com)
 

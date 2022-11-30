@@ -70,7 +70,7 @@ pub struct ActivityWindow {
     pub activities: Vec<Activity>,
 }
 
-impl<'a> ActivityWindow {
+impl ActivityWindow {
     // Functions
 
     /// # Arguments

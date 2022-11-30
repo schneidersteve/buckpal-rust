@@ -8,6 +8,7 @@ use crate::{
     outbound_ports::{AccountLock, LoadAccountPort, UpdateAccountStatePort},
 };
 
+#[derive(Debug)]
 pub struct SendMoneyUseCaseImpl {
     load_account_port: Box<dyn LoadAccountPort>,
     account_lock: Box<dyn AccountLock>,
@@ -83,6 +84,9 @@ impl SendMoneyUseCase for SendMoneyUseCaseImpl {
     }
 }
 
+unsafe impl Send for SendMoneyUseCaseImpl {}
+unsafe impl Sync for SendMoneyUseCaseImpl {}
+
 #[derive(PartialEq, Hash, Debug)]
 pub struct MoneyTransferProperties {
     maximum_transfer_threshold: Money,
@@ -120,6 +124,7 @@ mod tests {
     }
 
     mock! {
+        #[derive(Debug)]
         LoadAccountPortImpl {}
         impl LoadAccountPort for LoadAccountPortImpl {
             fn load_account(&self, account_id: AccountId, baseline_date: NaiveDateTime) -> Box<dyn Account>;
@@ -127,6 +132,7 @@ mod tests {
     }
 
     mock! {
+        #[derive(Debug)]
         NoOpAccountLockImpl {}
         impl AccountLock for NoOpAccountLockImpl {
             fn lock_account(&self, account_id: AccountId);
@@ -135,6 +141,7 @@ mod tests {
     }
 
     mock! {
+        #[derive(Debug)]
         UpdateAccountStatePortImpl {}
         impl UpdateAccountStatePort for UpdateAccountStatePortImpl {
             fn update_activities(&self, account: Box<dyn Account>);
@@ -161,7 +168,6 @@ mod tests {
         load_account_port
             .expect_load_account()
             .with(eq(AccountId(41)), always())
-            .times(1)
             .returning(move |account_id, baseline_date| {
                 source_account_closure(account_id, baseline_date)
             });
@@ -181,7 +187,6 @@ mod tests {
         load_account_port
             .expect_load_account()
             .with(eq(AccountId(42)), always())
-            .times(1)
             .returning(move |account_id, baseline_date| {
                 target_account_closure(account_id, baseline_date)
             });
@@ -191,8 +196,8 @@ mod tests {
         // And target account is locked
         account_lock.expect_lock_account().times(2).return_const(());
 
-        // And target account is released
         // And source account is released
+        // And target account is released
         account_lock
             .expect_release_account()
             .times(2)
@@ -220,5 +225,69 @@ mod tests {
     }
 
     #[test]
-    fn test_given_withdrawal_fails_then_only_source_account_is_locked_and_released() {}
+    fn test_given_withdrawal_fails_then_only_source_account_is_locked_and_released() {
+        let mut load_account_port = Box::new(MockLoadAccountPortImpl::new());
+        // Given a source account
+        let source_account_closure =
+            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
+                let mut account = Box::new(MockAccountImpl::new());
+                account
+                    .expect_get_id()
+                    .returning(move || Some(account_id.clone()));
+
+                // And source account withdrawal will fail
+                account.expect_withdraw().return_const(false);
+
+                account
+            };
+        load_account_port
+            .expect_load_account()
+            .with(eq(AccountId(41)), always())
+            .returning(move |account_id, baseline_date| {
+                source_account_closure(account_id, baseline_date)
+            });
+        // And a target account
+        let target_account_closure =
+            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
+                let mut account = Box::new(MockAccountImpl::new());
+                account
+                    .expect_get_id()
+                    .returning(move || Some(account_id.clone()));
+
+                // And target account deposit will succeed
+                account.expect_deposit().return_const(true);
+
+                account
+            };
+        load_account_port
+            .expect_load_account()
+            .with(eq(AccountId(42)), always())
+            .returning(move |account_id, baseline_date| {
+                target_account_closure(account_id, baseline_date)
+            });
+
+        let mut account_lock = Box::new(MockNoOpAccountLockImpl::new());
+        // And source account is locked
+        // And target account is not locked
+        account_lock.expect_lock_account().times(1).return_const(());
+
+        // And source account is released
+        account_lock
+            .expect_release_account()
+            .times(1)
+            .return_const(());
+
+        // When money is send
+        let command = SendMoneyCommand::new(AccountId(41), AccountId(42), Money::of(300));
+        let send_money_use_case = SendMoneyUseCaseImpl::new(
+            load_account_port,
+            account_lock,
+            Box::new(MockUpdateAccountStatePortImpl::new()),
+            MoneyTransferProperties::new(Some(Money::of(i128::MAX))),
+        );
+        let success = send_money_use_case.send_money(command);
+
+        // Then send money succeeds
+        assert!(!success);
+    }
 }

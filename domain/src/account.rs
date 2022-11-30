@@ -70,7 +70,6 @@ impl AccountImpl {
 
 impl Account for AccountImpl {
     fn get_id(&self) -> Option<AccountId> {
-        // Return a copy
         self.id.clone()
     }
 

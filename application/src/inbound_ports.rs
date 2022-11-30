@@ -1,6 +1,6 @@
 use domain::{account::AccountId, money::Money};
 
-pub trait SendMoneyUseCase {
+pub trait SendMoneyUseCase : Send + Sync + std::fmt::Debug {
     fn send_money(&self, command: SendMoneyCommand) -> bool;
 }
 

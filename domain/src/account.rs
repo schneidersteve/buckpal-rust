@@ -1,9 +1,8 @@
-use chrono::Local;
-
 use crate::{
     activity_window::{Activity, ActivityWindow},
     money::Money,
 };
+use chrono::Local;
 
 #[derive(Clone, PartialEq, Hash, Debug)]
 pub struct AccountId(pub i64);
@@ -14,18 +13,19 @@ pub struct AccountId(pub i64);
  * the sum of a baseline balance that was valid before the first activity in the
  * window and the sum of the activity values.
  */
-pub trait Account {
+pub trait Account: Send + Sync {
     fn get_id(&self) -> Option<AccountId>;
     fn calculate_balance(&self) -> Money;
     fn withdraw(&mut self, money: Money, target_account_id: AccountId) -> bool;
     fn deposit(&mut self, money: Money, source_account_id: AccountId) -> bool;
+    fn get_activity_window(&self) -> &ActivityWindow;
 }
 
 #[derive(Debug)]
 pub struct AccountImpl {
     id: Option<AccountId>,
     baseline_balance: Money,
-    activity_window: ActivityWindow,
+    pub activity_window: ActivityWindow,
 }
 
 impl AccountImpl {
@@ -121,14 +121,17 @@ impl Account for AccountImpl {
         self.activity_window.add_activity(deposit);
         true
     }
+
+    fn get_activity_window(&self) -> &ActivityWindow {
+        &self.activity_window
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::any::Any;
-
     use super::*;
     use crate::testdata::{default_account, default_activity};
+    use std::any::Any;
 
     #[test]
     fn test_calculates_balance() {

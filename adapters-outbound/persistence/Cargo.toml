@@ -1,0 +1,19 @@
+[package]
+name = "adapters-outbound-persistence"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+doctest = false
+
+[dependencies]
+domain = { version = "0.0.1", path = "../../domain" }
+application = { version = "0.0.1", path = "../../application" }
+chrono = "0.4"
+sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "sqlite" ] }
+async-trait = "0.1"
+# mockall_double = "0.3"
+
+[dev-dependencies]
+mockall = "0.11"
+tokio = { version = "1", features = ["macros"] }

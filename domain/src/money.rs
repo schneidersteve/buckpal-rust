@@ -2,7 +2,7 @@ use num_bigint::BigInt;
 
 #[derive(Clone, PartialEq, Hash, Debug)]
 pub struct Money {
-    amount: BigInt,
+    pub amount: BigInt,
 }
 
 impl Money {

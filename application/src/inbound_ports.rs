@@ -1,9 +1,12 @@
+use async_trait::async_trait;
 use domain::{account::AccountId, money::Money};
 
-pub trait SendMoneyUseCase : Send + Sync + std::fmt::Debug {
-    fn send_money(&self, command: SendMoneyCommand) -> bool;
+#[async_trait]
+pub trait SendMoneyUseCase: Send + Sync + std::fmt::Debug {
+    async fn send_money(&self, command: SendMoneyCommand) -> bool;
 }
 
+// TODO implement validating
 #[derive(PartialEq, Hash, Debug)]
 pub struct SendMoneyCommand {
     pub source_account_id: AccountId,

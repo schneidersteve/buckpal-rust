@@ -1,12 +1,11 @@
-use std::ops::Sub;
-
-use chrono::{Days, Local};
-use domain::money::Money;
-
 use crate::{
     inbound_ports::{SendMoneyCommand, SendMoneyUseCase},
     outbound_ports::{AccountLock, LoadAccountPort, UpdateAccountStatePort},
 };
+use async_trait::async_trait;
+use chrono::{Days, Local};
+use domain::money::Money;
+use std::ops::Sub;
 
 #[derive(Debug)]
 pub struct SendMoneyUseCaseImpl {
@@ -17,6 +16,7 @@ pub struct SendMoneyUseCaseImpl {
 }
 
 impl SendMoneyUseCaseImpl {
+    // #[inject]
     pub fn new(
         load_account_port: Box<dyn LoadAccountPort>,
         account_lock: Box<dyn AccountLock>,
@@ -41,24 +41,29 @@ impl SendMoneyUseCaseImpl {
     }
 }
 
+#[async_trait]
 impl SendMoneyUseCase for SendMoneyUseCaseImpl {
-    fn send_money(&self, command: SendMoneyCommand) -> bool {
+    async fn send_money(&self, command: SendMoneyCommand) -> bool {
         self.check_threshold(&command);
 
         let baseline_date = Local::now().naive_local().sub(Days::new(10));
 
         let mut source_account = self
             .load_account_port
-            .load_account(command.source_account_id, baseline_date);
+            .load_account(command.source_account_id, baseline_date)
+            .await;
 
         let mut target_account = self
             .load_account_port
-            .load_account(command.target_account_id, baseline_date);
+            .load_account(command.target_account_id, baseline_date)
+            .await;
 
-        let source_account_id = source_account.get_id().unwrap();
-        // .unwrap_or(panic!("expected source account ID not to be empty"));
-        let target_account_id = source_account.get_id().unwrap();
-        // .unwrap_or(panic!("expected target account ID not to be empty"));
+        let source_account_id = source_account
+            .get_id()
+            .unwrap_or_else(|| panic!("expected source account ID not to be empty"));
+        let target_account_id = source_account
+            .get_id()
+            .unwrap_or_else(|| panic!("expected target account ID not to be empty"));
 
         self.account_lock.lock_account(source_account_id.clone());
         if !source_account.withdraw(command.money.clone(), target_account_id.clone()) {
@@ -74,9 +79,11 @@ impl SendMoneyUseCase for SendMoneyUseCaseImpl {
         }
 
         self.update_account_state_port
-            .update_activities(source_account);
+            .update_activities(source_account)
+            .await;
         self.update_account_state_port
-            .update_activities(target_account);
+            .update_activities(target_account)
+            .await;
 
         self.account_lock.release_account(source_account_id);
         self.account_lock.release_account(target_account_id);
@@ -106,7 +113,10 @@ impl MoneyTransferProperties {
 mod tests {
     use super::*;
     use chrono::NaiveDateTime;
-    use domain::account::{Account, AccountId};
+    use domain::{
+        account::{Account, AccountId},
+        activity_window::ActivityWindow,
+    };
     use mockall::{
         mock,
         predicate::{always, eq},
@@ -120,14 +130,16 @@ mod tests {
             fn calculate_balance(&self) -> Money;
             fn withdraw(&mut self, money: Money, target_account_id: AccountId) -> bool;
             fn deposit(&mut self, money: Money, source_account_id: AccountId) -> bool;
+            fn get_activity_window(&self) -> &ActivityWindow;
         }
     }
 
     mock! {
         #[derive(Debug)]
         LoadAccountPortImpl {}
+        #[async_trait]
         impl LoadAccountPort for LoadAccountPortImpl {
-            fn load_account(&self, account_id: AccountId, baseline_date: NaiveDateTime) -> Box<dyn Account>;
+            async fn load_account(&self, account_id: AccountId, baseline_date: NaiveDateTime) -> Box<dyn Account>;
         }
     }
 
@@ -143,14 +155,15 @@ mod tests {
     mock! {
         #[derive(Debug)]
         UpdateAccountStatePortImpl {}
+        #[async_trait]
         impl UpdateAccountStatePort for UpdateAccountStatePortImpl {
-            fn update_activities(&self, account: Box<dyn Account>);
+            async fn update_activities(&self, account: Box<dyn Account>);
         }
     }
 
     // TODO Add with() parameter expectations
-    #[test]
-    fn test_transaction_succeeds() {
+    #[async_std::test]
+    async fn test_transaction_succeeds() {
         let mut load_account_port = Box::new(MockLoadAccountPortImpl::new());
         // Given a source account
         let source_account_closure =
@@ -218,14 +231,14 @@ mod tests {
             update_account_state_port,
             MoneyTransferProperties::new(Some(Money::of(i128::MAX))),
         );
-        let success = send_money_use_case.send_money(command);
+        let success = send_money_use_case.send_money(command).await;
 
         // Then send money succeeds
         assert!(success);
     }
 
-    #[test]
-    fn test_given_withdrawal_fails_then_only_source_account_is_locked_and_released() {
+    #[async_std::test]
+    async fn test_given_withdrawal_fails_then_only_source_account_is_locked_and_released() {
         let mut load_account_port = Box::new(MockLoadAccountPortImpl::new());
         // Given a source account
         let source_account_closure =
@@ -285,7 +298,7 @@ mod tests {
             Box::new(MockUpdateAccountStatePortImpl::new()),
             MoneyTransferProperties::new(Some(Money::of(i128::MAX))),
         );
-        let success = send_money_use_case.send_money(command);
+        let success = send_money_use_case.send_money(command).await;
 
         // Then send money succeeds
         assert!(!success);

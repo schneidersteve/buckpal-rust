@@ -1,21 +1,20 @@
+use crate::{account::AccountId, money::Money};
 use chrono::NaiveDateTime;
 
-use crate::{account::AccountId, money::Money};
-
 #[derive(PartialEq, Hash, Debug)]
-pub struct ActivityId(i64);
+pub struct ActivityId(pub i64);
 
 /**
  * A money transfer activity between [Account]s
  */
 #[derive(PartialEq, Hash, Debug)]
 pub struct Activity {
-    id: Option<ActivityId>,
-    owner_account_id: AccountId,
-    source_account_id: AccountId,
-    target_account_id: AccountId,
-    timestamp: NaiveDateTime,
-    money: Money,
+    pub id: Option<ActivityId>,
+    pub owner_account_id: AccountId,
+    pub source_account_id: AccountId,
+    pub target_account_id: AccountId,
+    pub timestamp: NaiveDateTime,
+    pub money: Money,
 }
 
 impl Activity {

@@ -10,7 +10,7 @@ use persistence::{
 use salvo::prelude::*;
 use sqlx::{migrate, sqlite::SqlitePoolOptions, SqlitePool};
 use std::sync::Arc;
-use web::send_money_handler::{get_routes, set_dependencies};
+use rest::send_money_handler::{get_routes, set_dependencies};
 
 #[tokio::main]
 async fn main() {

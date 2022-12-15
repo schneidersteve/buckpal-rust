@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "adapters-inbound-web"
+name = "adapters-inbound-rest"
 version = "0.0.1"
 dependencies = [
  "application",
@@ -1246,7 +1246,7 @@ dependencies = [
 name = "main"
 version = "0.0.1"
 dependencies = [
- "adapters-inbound-web",
+ "adapters-inbound-rest",
  "adapters-outbound-persistence",
  "application",
  "chrono",

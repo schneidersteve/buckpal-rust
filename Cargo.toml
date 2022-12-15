@@ -2,7 +2,7 @@
 members = [
     "domain",
     "application",
-    "adapters-inbound/web",
+    "adapters-inbound/rest",
     "adapters-outbound/persistence",
     "main",
 ]

@@ -18,7 +18,7 @@ mod tests {
     use sqlx::{migrate, sqlite::SqlitePoolOptions, SqlitePool};
     use std::sync::Arc;
     use tokio::sync::oneshot;
-    use web::send_money_handler::{get_routes, set_dependencies};
+    use rest::send_money_handler::{get_routes, set_dependencies};
 
     #[tokio::test]
     async fn test_send_money() {

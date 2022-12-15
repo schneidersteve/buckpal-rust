@@ -1,0 +1,21 @@
+[package]
+name = "main"
+version = "0.0.1"
+edition = "2021"
+
+# doctest = false
+
+[dependencies]
+web = { package = "adapters-inbound-web", version = "0.0.1", path = "../adapters-inbound/web" }
+persistence = { package = "adapters-outbound-persistence", version = "0.0.1", path = "../adapters-outbound/persistence" }
+application = { version = "0.0.1", path = "../application" }
+domain = { version = "0.0.1", path = "../domain" }
+tokio = { version = "1", features = ["macros"] }
+salvo = "0.37"
+sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite"] }
+
+[dev-dependencies]
+chrono = "0.4"
+reqwest = { version = "0.11" }
+log = "0.4"
+env_logger = "0.10.0"

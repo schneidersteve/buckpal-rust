@@ -5,22 +5,23 @@ use crate::{
 use async_trait::async_trait;
 use chrono::{Days, Local};
 use domain::money::Money;
-use std::ops::Sub;
+use std::{ops::Sub, sync::Arc};
 
+// #[singleton]
 #[derive(Debug)]
 pub struct SendMoneyUseCaseImpl {
-    load_account_port: Box<dyn LoadAccountPort>,
+    load_account_port: Arc<dyn LoadAccountPort>,
     account_lock: Box<dyn AccountLock>,
-    update_account_state_port: Box<dyn UpdateAccountStatePort>,
+    update_account_state_port: Arc<dyn UpdateAccountStatePort>,
     money_transfer_properties: MoneyTransferProperties,
 }
 
 impl SendMoneyUseCaseImpl {
     // #[inject]
     pub fn new(
-        load_account_port: Box<dyn LoadAccountPort>,
+        load_account_port: Arc<dyn LoadAccountPort>,
         account_lock: Box<dyn AccountLock>,
-        update_account_state_port: Box<dyn UpdateAccountStatePort>,
+        update_account_state_port: Arc<dyn UpdateAccountStatePort>,
         money_transfer_properties: MoneyTransferProperties,
     ) -> Self {
         Self {
@@ -40,6 +41,9 @@ impl SendMoneyUseCaseImpl {
         }
     }
 }
+
+unsafe impl Send for SendMoneyUseCaseImpl {}
+unsafe impl Sync for SendMoneyUseCaseImpl {}
 
 #[async_trait]
 impl SendMoneyUseCase for SendMoneyUseCaseImpl {
@@ -61,7 +65,7 @@ impl SendMoneyUseCase for SendMoneyUseCaseImpl {
         let source_account_id = source_account
             .get_id()
             .unwrap_or_else(|| panic!("expected source account ID not to be empty"));
-        let target_account_id = source_account
+        let target_account_id = target_account
             .get_id()
             .unwrap_or_else(|| panic!("expected target account ID not to be empty"));
 
@@ -91,9 +95,7 @@ impl SendMoneyUseCase for SendMoneyUseCaseImpl {
     }
 }
 
-unsafe impl Send for SendMoneyUseCaseImpl {}
-unsafe impl Sync for SendMoneyUseCaseImpl {}
-
+// #[singleton]
 #[derive(PartialEq, Hash, Debug)]
 pub struct MoneyTransferProperties {
     maximum_transfer_threshold: Money,
@@ -102,9 +104,9 @@ pub struct MoneyTransferProperties {
 impl MoneyTransferProperties {
     // Functions
 
-    pub fn new(mtt: Option<Money>) -> Self {
+    pub fn new(maximum_transfer_threshold: Option<Money>) -> Self {
         Self {
-            maximum_transfer_threshold: mtt.unwrap_or(Money::of(1_000_000)),
+            maximum_transfer_threshold: maximum_transfer_threshold.unwrap_or(Money::of(1_000_000)),
         }
     }
 }
@@ -164,7 +166,7 @@ mod tests {
     // TODO Add with() parameter expectations
     #[async_std::test]
     async fn test_transaction_succeeds() {
-        let mut load_account_port = Box::new(MockLoadAccountPortImpl::new());
+        let mut load_account_port = MockLoadAccountPortImpl::new();
         // Given a source account
         let source_account_closure =
             |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
@@ -216,7 +218,7 @@ mod tests {
             .times(2)
             .return_const(());
 
-        let mut update_account_state_port = Box::new(MockUpdateAccountStatePortImpl::new());
+        let mut update_account_state_port = MockUpdateAccountStatePortImpl::new();
         // And accounts have been updated
         update_account_state_port
             .expect_update_activities()
@@ -226,9 +228,9 @@ mod tests {
         // When money is send
         let command = SendMoneyCommand::new(AccountId(41), AccountId(42), Money::of(500));
         let send_money_use_case = SendMoneyUseCaseImpl::new(
-            load_account_port,
+            Arc::new(load_account_port),
             account_lock,
-            update_account_state_port,
+            Arc::new(update_account_state_port),
             MoneyTransferProperties::new(Some(Money::of(i128::MAX))),
         );
         let success = send_money_use_case.send_money(command).await;
@@ -239,7 +241,7 @@ mod tests {
 
     #[async_std::test]
     async fn test_given_withdrawal_fails_then_only_source_account_is_locked_and_released() {
-        let mut load_account_port = Box::new(MockLoadAccountPortImpl::new());
+        let mut load_account_port = MockLoadAccountPortImpl::new();
         // Given a source account
         let source_account_closure =
             |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
@@ -293,9 +295,9 @@ mod tests {
         // When money is send
         let command = SendMoneyCommand::new(AccountId(41), AccountId(42), Money::of(300));
         let send_money_use_case = SendMoneyUseCaseImpl::new(
-            load_account_port,
+            Arc::new(load_account_port),
             account_lock,
-            Box::new(MockUpdateAccountStatePortImpl::new()),
+            Arc::new(MockUpdateAccountStatePortImpl::new()),
             MoneyTransferProperties::new(Some(Money::of(i128::MAX))),
         );
         let success = send_money_use_case.send_money(command).await;

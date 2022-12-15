@@ -31,7 +31,7 @@ fn map_to_activity_window(activities: Vec<ActivityEntity>) -> ActivityWindow {
                     AccountId(ae.source_account_id),
                     AccountId(ae.target_account_id),
                     ae.timestamp,
-                    Money::of(ae.amount),
+                    Money::of(ae.amount as i128),
                 )
             })
             .collect(),
@@ -39,7 +39,7 @@ fn map_to_activity_window(activities: Vec<ActivityEntity>) -> ActivityWindow {
 }
 
 pub fn map_to_activity_entity(activity: &Activity) -> ActivityEntity {
-    let amount = activity.money.amount.to_string().parse::<i128>().unwrap();
+    let amount = activity.money.amount.to_string().parse::<i128>().unwrap() as i64;
     let mut id = None;
     if let Some(aid) = &activity.id {
         id = Some(aid.0);

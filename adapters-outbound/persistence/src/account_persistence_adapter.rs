@@ -5,9 +5,11 @@ use application::outbound_ports::{LoadAccountPort, UpdateAccountStatePort};
 use async_trait::async_trait;
 use chrono::NaiveDateTime;
 use domain::account::{Account, AccountId};
+use log::debug;
 
+// #[singleton]
 #[derive(Debug)]
-struct AccountPersistenceAdapter {
+pub struct AccountPersistenceAdapter {
     account_repository: Box<dyn AccountRepository>,
     activity_repository: Box<dyn ActivityRepository>,
 }
@@ -37,26 +39,36 @@ impl LoadAccountPort for AccountPersistenceAdapter {
             .find_by_id(account_id.0)
             .await
             .unwrap_or_else(|| panic!("EntityNotFoundException"));
+        debug!("find_by_id(id = {:?}) = {:?}", account_id, account);
 
         let activities = self
             .activity_repository
-            .find_by_owner_account_id_equals_and_timestamp_greater_than_equals(
-                account_id.0,
-                baseline_date,
-            )
+            .find_by_owner_since(account_id.0, baseline_date)
             .await;
+        debug!(
+            "find_by_owner_since(owner_account_id = {:?}, timestamp = {}) = {:?}",
+            account_id, baseline_date, activities
+        );
 
         let withdrawal_balance = self
             .activity_repository
             .get_withdrawal_balance_until(account_id.0, baseline_date)
             .await
             .unwrap_or(0);
+        debug!(
+            "get_withdrawal_balance_until(account_id = {:?}, until = {}) = {:?}",
+            account_id, baseline_date, withdrawal_balance
+        );
 
         let deposit_balance = self
             .activity_repository
             .get_deposit_balance_until(account_id.0, baseline_date)
             .await
             .unwrap_or(0);
+        debug!(
+            "get_deposit_balance_until(account_id = {:?}, until = {}) = {:?}",
+            account_id, baseline_date, deposit_balance
+        );
 
         account_mapper::map_to_account(account, activities, withdrawal_balance, deposit_balance)
     }
@@ -67,9 +79,9 @@ impl UpdateAccountStatePort for AccountPersistenceAdapter {
     async fn update_activities(&self, account: Box<dyn Account>) {
         for activity in &account.get_activity_window().activities {
             if activity.id.is_none() {
-                self.activity_repository
-                    .save(account_mapper::map_to_activity_entity(activity))
-                    .await;
+                let ae = account_mapper::map_to_activity_entity(activity);
+                debug!("save(activity_entity = {:?}", ae);
+                self.activity_repository.save(ae).await;
             }
         }
     }
@@ -102,7 +114,7 @@ mod tests {
         ActivityRepositoryImpl {}
         #[async_trait]
         impl ActivityRepository for ActivityRepositoryImpl {
-            async fn find_by_owner_account_id_equals_and_timestamp_greater_than_equals(
+            async fn find_by_owner_since(
                 &self,
                 owner_account_id: i64,
                 timestamp: NaiveDateTime,
@@ -138,7 +150,7 @@ mod tests {
 
         let mut activity_repository = Box::new(MockActivityRepositoryImpl::new());
         activity_repository
-            .expect_find_by_owner_account_id_equals_and_timestamp_greater_than_equals()
+            .expect_find_by_owner_since()
             .with(eq(account_id.0), eq(baseline_date))
             .returning(|_owner_account_id, _timestamp| {
                 vec![

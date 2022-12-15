@@ -69,6 +69,7 @@ pub struct ActivityWindow {
     pub activities: Vec<Activity>,
 }
 
+#[allow(dead_code)]
 impl ActivityWindow {
     // Functions
 

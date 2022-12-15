@@ -10,9 +10,9 @@ doctest = false
 domain = { version = "0.0.1", path = "../../domain" }
 application = { version = "0.0.1", path = "../../application" }
 chrono = "0.4"
-sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "sqlite" ] }
+sqlx = { version = "0.6", features = [ "runtime-tokio-rustls", "sqlite", "chrono" ] }
 async-trait = "0.1"
-# mockall_double = "0.3"
+log = "0.4"
 
 [dev-dependencies]
 mockall = "0.11"

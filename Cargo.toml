@@ -4,4 +4,5 @@ members = [
     "application",
     "adapters-inbound/web",
     "adapters-outbound/persistence",
+    "main",
 ]

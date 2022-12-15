@@ -1,1 +1,1 @@
-mod send_money_handler;
+pub mod send_money_handler;

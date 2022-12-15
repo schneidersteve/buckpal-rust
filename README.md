@@ -41,3 +41,11 @@ Feature: Send Money
 
     And accounts have been updated
 ```
+
+## SQLx CLI
+
+> cd main
+
+> sqlx database create --database-url sqlite:file:data.db
+
+> sqlx migrate run --database-url sqlite:file:data.db

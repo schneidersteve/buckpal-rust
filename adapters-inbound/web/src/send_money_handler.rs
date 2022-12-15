@@ -5,12 +5,12 @@ use salvo::prelude::*;
 
 static SEND_MONEY_USE_CASE: OnceCell<Box<dyn SendMoneyUseCase>> = OnceCell::new();
 
-fn set_dependencies(smuc: Box<dyn SendMoneyUseCase>) {
+pub fn set_dependencies(smuc: Box<dyn SendMoneyUseCase>) {
     SEND_MONEY_USE_CASE.set(smuc).unwrap();
 }
 
 // POST /accounts/send/<sourceAccountId>/<targetAccountId>/<amount>
-fn get_routes() -> Router {
+pub fn get_routes() -> Router {
     Router::with_path("accounts").push(
         Router::with_path("send/<sourceAccountId:num>/<targetAccountId:num>/<amount:num>")
             .post(send_money),

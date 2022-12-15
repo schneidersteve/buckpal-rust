@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use log::debug;
 use sqlx::{Row, SqlitePool};
 
 #[async_trait]
@@ -6,8 +7,9 @@ pub trait AccountRepository: Send + Sync + std::fmt::Debug {
     async fn find_by_id(&self, id: i64) -> Option<AccountEntity>;
 }
 
+// #[singleton]
 #[derive(Debug)]
-struct AccountRepositoryImpl {
+pub struct AccountRepositoryImpl {
     db_pool: SqlitePool,
 }
 
@@ -21,14 +23,20 @@ impl AccountRepositoryImpl {
 #[async_trait]
 impl AccountRepository for AccountRepositoryImpl {
     async fn find_by_id(&self, id: i64) -> Option<AccountEntity> {
-        let row = sqlx::query("SELECT id FROM account_entity WHERE id = ?")
-            .bind(id)
-            .fetch_one(&self.db_pool)
-            .await;
+        let row = sqlx::query(
+            "
+            SELECT id FROM account_entity
+            WHERE id = ?
+            ",
+        )
+        .bind(id)
+        .fetch_one(&self.db_pool)
+        .await;
         if let Ok(row) = row {
-            return Some(AccountEntity {
+            let ae = AccountEntity {
                 id: row.try_get("id").unwrap(),
-            });
+            };
+            return Some(ae);
         }
         None
     }

@@ -1,5 +1,5 @@
 use application::inbound_ports::{SendMoneyCommand, SendMoneyUseCase};
-use domain::{account::AccountId, money::Money};
+use domain::{ar::account::AccountId, vo::money::Money};
 use once_cell::sync::OnceCell;
 use salvo::prelude::*;
 
@@ -33,7 +33,6 @@ async fn send_money(req: &mut Request, res: &mut Response) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use domain::account::AccountId;
     use mockall::{mock, predicate::eq};
     use salvo::test::TestClient;
 

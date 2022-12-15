@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use domain::{account::AccountId, money::Money};
+use domain::{ar::account::AccountId, vo::money::Money};
 
 #[async_trait]
 pub trait SendMoneyUseCase: Send + Sync + std::fmt::Debug {

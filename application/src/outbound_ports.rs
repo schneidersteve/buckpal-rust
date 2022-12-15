@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use chrono::NaiveDateTime;
-use domain::account::{Account, AccountId};
+use domain::ar::account::{Account, AccountId};
 
 #[async_trait]
 pub trait LoadAccountPort: Send + Sync + std::fmt::Debug {

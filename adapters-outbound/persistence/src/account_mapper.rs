@@ -1,8 +1,10 @@
 use crate::{account_repository::AccountEntity, activity_repository::ActivityEntity};
 use domain::{
-    account::{Account, AccountId, AccountImpl},
-    activity_window::{Activity, ActivityId, ActivityWindow},
-    money::Money,
+    ar::{
+        account::{Account, AccountId, AccountImpl},
+        activity::{Activity, ActivityId},
+    },
+    vo::{activity_window::ActivityWindow, money::Money},
 };
 
 pub fn map_to_account(

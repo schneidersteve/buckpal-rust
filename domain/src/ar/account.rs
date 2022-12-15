@@ -1,7 +1,5 @@
-use crate::{
-    activity_window::{Activity, ActivityWindow},
-    money::Money,
-};
+use super::activity::Activity;
+use crate::vo::{activity_window::ActivityWindow, money::Money};
 use chrono::Local;
 
 #[derive(Clone, PartialEq, Hash, Debug)]

@@ -2,13 +2,13 @@ use application::{
     no_op_account_lock::NoOpAccountLock,
     send_money_use_case::{MoneyTransferProperties, SendMoneyUseCaseImpl},
 };
-use domain::money::Money;
+use domain::vo::money::Money;
 use persistence::{
     account_persistence_adapter::AccountPersistenceAdapter,
     account_repository::AccountRepositoryImpl, activity_repository::ActivityRepositoryImpl,
 };
 use salvo::prelude::*;
-use sqlx::{sqlite::SqlitePoolOptions, SqlitePool, migrate};
+use sqlx::{migrate, sqlite::SqlitePoolOptions, SqlitePool};
 use std::sync::Arc;
 use web::send_money_handler::{get_routes, set_dependencies};
 

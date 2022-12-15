@@ -1,9 +1,6 @@
-use crate::{
-    account::{Account, AccountId, AccountImpl},
-    activity_window::{Activity, ActivityId, ActivityWindow},
-    money::Money,
-};
 use chrono::{Local, NaiveDateTime};
+
+use crate::{vo::{money::Money, activity_window::ActivityWindow}, ar::{account::{AccountId, Account, AccountImpl}, activity::{ActivityId, Activity}}};
 
 pub fn default_account() -> AccountBuilder {
     AccountBuilder::new()

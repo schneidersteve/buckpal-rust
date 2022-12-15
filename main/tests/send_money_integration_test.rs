@@ -6,7 +6,7 @@ mod tests {
         send_money_use_case::{MoneyTransferProperties, SendMoneyUseCaseImpl},
     };
     use chrono::Local;
-    use domain::{account::AccountId, money::Money};
+    use domain::{ar::account::AccountId, vo::money::Money};
     use env_logger::WriteStyle;
     use log::LevelFilter;
     use persistence::{

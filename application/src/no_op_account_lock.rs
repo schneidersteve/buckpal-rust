@@ -1,5 +1,5 @@
 use crate::outbound_ports::AccountLock;
-use domain::account::AccountId;
+use domain::ar::account::AccountId;
 
 #[derive(Debug)]
 pub struct NoOpAccountLock {}

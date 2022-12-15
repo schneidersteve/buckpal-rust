@@ -4,7 +4,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use chrono::{Days, Local};
-use domain::money::Money;
+use domain::vo::money::Money;
 use std::{ops::Sub, sync::Arc};
 
 // #[singleton]
@@ -116,8 +116,8 @@ mod tests {
     use super::*;
     use chrono::NaiveDateTime;
     use domain::{
-        account::{Account, AccountId},
-        activity_window::ActivityWindow,
+        ar::account::{Account, AccountId},
+        vo::activity_window::ActivityWindow,
     };
     use mockall::{
         mock,

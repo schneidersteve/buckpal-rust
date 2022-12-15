@@ -4,7 +4,7 @@ use crate::{
 use application::outbound_ports::{LoadAccountPort, UpdateAccountStatePort};
 use async_trait::async_trait;
 use chrono::NaiveDateTime;
-use domain::account::{Account, AccountId};
+use domain::ar::account::{Account, AccountId};
 use log::debug;
 
 // #[singleton]
@@ -92,11 +92,10 @@ mod tests {
     use super::*;
     use crate::{account_repository::AccountEntity, activity_repository::ActivityEntity};
     use chrono::{NaiveDate, NaiveTime};
-    use domain::account::AccountImpl;
     use domain::{
-        activity_window::ActivityWindow,
-        money::Money,
+        ar::account::AccountImpl,
         testdata::{default_account, default_activity},
+        vo::{activity_window::ActivityWindow, money::Money},
     };
     use mockall::{mock, predicate::eq};
 

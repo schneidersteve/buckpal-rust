@@ -10,19 +10,18 @@ pub struct ActivityWindow {
     pub activities: Vec<Activity>,
 }
 
-#[allow(dead_code)]
+// Associated Functions
 impl ActivityWindow {
-    // Functions
-
     /// # Arguments
     ///
     /// * `activities` - The list of account activities within this window.
     pub fn new(activities: Vec<Activity>) -> Self {
         Self { activities }
     }
+}
 
-    // Methods
-
+// Methods
+impl ActivityWindow {
     /**
      * The timestamp of the first activity within this window.
      */

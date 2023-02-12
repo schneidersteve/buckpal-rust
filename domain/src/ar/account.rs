@@ -26,9 +26,8 @@ pub struct AccountImpl {
     pub activity_window: ActivityWindow,
 }
 
+// Associated Functions
 impl AccountImpl {
-    // Functions
-
     /// # Arguments
     ///
     /// * `id` - The unique ID of the account.
@@ -57,9 +56,10 @@ impl AccountImpl {
     ) -> impl Account {
         AccountImpl::new(Some(account_id), baseline_balance, activity_window)
     }
+}
 
-    // Methods
-
+// Methods
+impl AccountImpl {
     #[allow(unused)]
     fn may_withdraw(&self, money: &Money) -> bool {
         Money::add(&self.calculate_balance(), &money.negate()).is_positive_or_zero()

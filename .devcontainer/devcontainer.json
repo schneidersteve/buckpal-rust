@@ -1,0 +1,9 @@
+{
+	"name": "Debian",
+	"build": { "dockerfile": "Dockerfile" },
+	"customizations": {
+		"vscode": {
+		  "extensions": ["rust-lang.rust-analyzer", "vadimcn.vscode-lldb", "tamasfe.even-better-toml", "esbenp.prettier-vscode"]
+		}
+	  }
+}

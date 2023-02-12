@@ -10,9 +10,11 @@ Kotlin Version: https://github.com/schneidersteve/buckpal-kotlin
 * [Rust Async](https://rust-lang.github.io/async-book/)
 * [Mockall](https://github.com/asomers/mockall)
 * [Salvo](https://salvo.rs)
+* [openssl](https://docs.rs/openssl/latest/openssl/)
 * [SQLx](https://github.com/launchbadge/sqlx)
 * [rust-analyzer](https://rust-analyzer.github.io)
 * [Visual Studio Code](https://code.visualstudio.com)
+* [Visual Studio Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-a-git-repository-or-github-pr-in-an-isolated-container-volume)
 
 ## Layers and Dependency Inversion
 
@@ -42,10 +44,20 @@ Feature: Send Money
     And accounts have been updated
 ```
 
-## SQLx CLI
+# Cargo Examples
 
-> cd main
+> cargo clean
 
-> sqlx database create --database-url sqlite:file:data.db
+> cargo build
 
-> sqlx migrate run --database-url sqlite:file:data.db
+> cargo test
+
+> cargo run
+
+> cargo install cargo-watch
+
+> cargo watch --clear -x "run"
+
+> cargo watch --clear -x "test"
+
+> cargo watch --clear -x "test -- --show-output"

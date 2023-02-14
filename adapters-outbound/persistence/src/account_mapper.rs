@@ -1,7 +1,7 @@
 use crate::{account_repository::AccountEntity, activity_repository::ActivityEntity};
 use domain::{
     ar::{
-        account::{Account, AccountId, AccountImpl},
+        account::{AccountId, Account},
         activity::{Activity, ActivityId},
     },
     vo::{activity_window::ActivityWindow, money::Money},
@@ -12,14 +12,14 @@ pub fn map_to_account(
     activities: Vec<ActivityEntity>,
     withdrawal_balance: i128,
     deposit_balance: i128,
-) -> Box<dyn Account> {
+) -> Account {
     let baseline_balance =
         Money::substract(&Money::of(deposit_balance), &Money::of(withdrawal_balance));
-    Box::new(AccountImpl::with_id(
+    Account::with_id(
         AccountId(account.id.unwrap()),
         baseline_balance,
         map_to_activity_window(activities),
-    ))
+    )
 }
 
 fn map_to_activity_window(activities: Vec<ActivityEntity>) -> ActivityWindow {

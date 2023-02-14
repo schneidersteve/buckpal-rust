@@ -2,6 +2,8 @@
 name = "application"
 version = "0.0.1"
 edition = "2021"
+# for the mockall feature in domain, should not be in production builds
+resolver = "2"
 
 [lib]
 doctest = false
@@ -10,7 +12,9 @@ doctest = false
 domain = { version = "0.0.1", path = "../domain" }
 chrono = "0.4"
 async-trait = "0.1"
+mockall_double = "0.3"
 
 [dev-dependencies]
+domain = { version = "0.0.1", path = "../domain", features = ["mockall"] }
 mockall = "0.11"
 async-std = { version = "1", features = ["attributes"] }

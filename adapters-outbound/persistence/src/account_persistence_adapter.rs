@@ -33,7 +33,7 @@ impl LoadAccountPort for AccountPersistenceAdapter {
         &self,
         account_id: AccountId,
         baseline_date: NaiveDateTime,
-    ) -> Box<dyn Account> {
+    ) -> Account {
         let account = self
             .account_repository
             .find_by_id(account_id.0)
@@ -76,8 +76,8 @@ impl LoadAccountPort for AccountPersistenceAdapter {
 
 #[async_trait]
 impl UpdateAccountStatePort for AccountPersistenceAdapter {
-    async fn update_activities(&self, account: Box<dyn Account>) {
-        for activity in &account.get_activity_window().activities {
+    async fn update_activities(&self, account: Account) {
+        for activity in &account.activity_window.activities {
             if activity.id.is_none() {
                 let ae = account_mapper::map_to_activity_entity(activity);
                 debug!("save(activity_entity = {:?}", ae);
@@ -93,7 +93,6 @@ mod tests {
     use crate::{account_repository::AccountEntity, activity_repository::ActivityEntity};
     use chrono::{NaiveDate, NaiveTime};
     use domain::{
-        ar::account::AccountImpl,
         testdata::{default_account, default_activity},
         vo::{activity_window::ActivityWindow, money::Money},
     };
@@ -194,9 +193,7 @@ mod tests {
             .await;
 
         // Then
-        let account_impl =
-            unsafe { &*(&account as *const Box<dyn Account> as *const Box<AccountImpl>) };
-        assert_eq!(2, account_impl.activity_window.activities.len());
+        assert_eq!(2, account.activity_window.activities.len());
         assert_eq!(Money::of(500), account.calculate_balance());
     }
 

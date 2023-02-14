@@ -2,6 +2,7 @@ use crate::{
     inbound_ports::{SendMoneyCommand, SendMoneyUseCase},
     outbound_ports::{AccountLock, LoadAccountPort, UpdateAccountStatePort},
 };
+
 use async_trait::async_trait;
 use chrono::{Days, Local};
 use domain::vo::money::Money;
@@ -113,64 +114,27 @@ impl MoneyTransferProperties {
 
 #[cfg(test)]
 mod tests {
+    use crate::outbound_ports::{MockAccountLock, MockLoadAccountPort, MockUpdateAccountStatePort};
+
     use super::*;
     use chrono::NaiveDateTime;
-    use domain::{
-        ar::account::{Account, AccountId},
-        vo::activity_window::ActivityWindow,
-    };
+    use domain::ar::account::AccountId;
     use mockall::{
-        mock,
         predicate::{always, eq},
     };
+    use mockall_double::double;
 
-    mock! {
-        #[derive(Debug)]
-        AccountImpl {}
-        impl Account for AccountImpl {
-            fn get_id(&self) -> Option<AccountId>;
-            fn calculate_balance(&self) -> Money;
-            fn withdraw(&mut self, money: Money, target_account_id: AccountId) -> bool;
-            fn deposit(&mut self, money: Money, source_account_id: AccountId) -> bool;
-            fn get_activity_window(&self) -> &ActivityWindow;
-        }
-    }
-
-    mock! {
-        #[derive(Debug)]
-        LoadAccountPortImpl {}
-        #[async_trait]
-        impl LoadAccountPort for LoadAccountPortImpl {
-            async fn load_account(&self, account_id: AccountId, baseline_date: NaiveDateTime) -> Box<dyn Account>;
-        }
-    }
-
-    mock! {
-        #[derive(Debug)]
-        NoOpAccountLockImpl {}
-        impl AccountLock for NoOpAccountLockImpl {
-            fn lock_account(&self, account_id: AccountId);
-            fn release_account(&self, account_id: AccountId);
-        }
-    }
-
-    mock! {
-        #[derive(Debug)]
-        UpdateAccountStatePortImpl {}
-        #[async_trait]
-        impl UpdateAccountStatePort for UpdateAccountStatePortImpl {
-            async fn update_activities(&self, account: Box<dyn Account>);
-        }
-    }
+    #[double]
+    use domain::ar::account::Account;
 
     // TODO Add with() parameter expectations
     #[async_std::test]
     async fn test_transaction_succeeds() {
-        let mut load_account_port = MockLoadAccountPortImpl::new();
+        let mut load_account_port = MockLoadAccountPort::new();
         // Given a source account
         let source_account_closure =
-            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
-                let mut account = Box::new(MockAccountImpl::new());
+            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Account {
+                let mut account = Account::new();
                 account
                     .expect_get_id()
                     .returning(move || Some(account_id.clone()));
@@ -188,8 +152,8 @@ mod tests {
             });
         // And a target account
         let target_account_closure =
-            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
-                let mut account = Box::new(MockAccountImpl::new());
+            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Account {
+                let mut account = Account::new();
                 account
                     .expect_get_id()
                     .returning(move || Some(account_id.clone()));
@@ -206,7 +170,7 @@ mod tests {
                 target_account_closure(account_id, baseline_date)
             });
 
-        let mut account_lock = Box::new(MockNoOpAccountLockImpl::new());
+        let mut account_lock = Box::new(MockAccountLock::new());
         // And source account is locked
         // And target account is locked
         account_lock.expect_lock_account().times(2).return_const(());
@@ -218,7 +182,7 @@ mod tests {
             .times(2)
             .return_const(());
 
-        let mut update_account_state_port = MockUpdateAccountStatePortImpl::new();
+        let mut update_account_state_port = MockUpdateAccountStatePort::new();
         // And accounts have been updated
         update_account_state_port
             .expect_update_activities()
@@ -241,11 +205,11 @@ mod tests {
 
     #[async_std::test]
     async fn test_given_withdrawal_fails_then_only_source_account_is_locked_and_released() {
-        let mut load_account_port = MockLoadAccountPortImpl::new();
+        let mut load_account_port = MockLoadAccountPort::new();
         // Given a source account
         let source_account_closure =
-            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
-                let mut account = Box::new(MockAccountImpl::new());
+            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Account {
+                let mut account = Account::new();
                 account
                     .expect_get_id()
                     .returning(move || Some(account_id.clone()));
@@ -263,8 +227,8 @@ mod tests {
             });
         // And a target account
         let target_account_closure =
-            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Box<dyn Account> {
-                let mut account = Box::new(MockAccountImpl::new());
+            |account_id: AccountId, _baseline_date: NaiveDateTime| -> Account {
+                let mut account = Account::new();
                 account
                     .expect_get_id()
                     .returning(move || Some(account_id.clone()));
@@ -281,7 +245,7 @@ mod tests {
                 target_account_closure(account_id, baseline_date)
             });
 
-        let mut account_lock = Box::new(MockNoOpAccountLockImpl::new());
+        let mut account_lock = Box::new(MockAccountLock::new());
         // And source account is locked
         // And target account is not locked
         account_lock.expect_lock_account().times(1).return_const(());
@@ -297,7 +261,7 @@ mod tests {
         let send_money_use_case = SendMoneyUseCaseImpl::new(
             Arc::new(load_account_port),
             account_lock,
-            Arc::new(MockUpdateAccountStatePortImpl::new()),
+            Arc::new(MockUpdateAccountStatePort::new()),
             MoneyTransferProperties::new(Some(Money::of(i128::MAX))),
         );
         let success = send_money_use_case.send_money(command).await;

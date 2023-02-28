@@ -60,3 +60,77 @@ impl ActivityWindow {
         self.activities.push(activity);
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{testdata::default_activity, vo::activity_window::ActivityWindow};
+    use chrono::{NaiveDate, NaiveTime};
+
+    #[test]
+    fn test_calculates_start_timestamp() {
+        let window = ActivityWindow::new(vec![
+            default_activity().with_timestamp(start_date()).build(),
+            default_activity().with_timestamp(in_between_date()).build(),
+            default_activity().with_timestamp(end_date()).build(),
+        ]);
+        assert_eq!(start_date(), window.get_start_timestamp());
+    }
+
+    #[test]
+    fn test_calculates_end_timestamp() {
+        let window = ActivityWindow::new(vec![
+            default_activity().with_timestamp(start_date()).build(),
+            default_activity().with_timestamp(in_between_date()).build(),
+            default_activity().with_timestamp(end_date()).build(),
+        ]);
+        assert_eq!(end_date(), window.get_end_timestamp());
+    }
+
+    #[test]
+    fn test_calculates_balance() {
+        let account1 = AccountId(1);
+        let account2 = AccountId(2);
+        let window = ActivityWindow::new(vec![
+            default_activity()
+                .with_source_account(account1.clone())
+                .with_target_account(account2.clone())
+                .with_money(Money::of(999))
+                .build(),
+            default_activity()
+                .with_source_account(account1.clone())
+                .with_target_account(account2.clone())
+                .with_money(Money::of(1))
+                .build(),
+            default_activity()
+                .with_source_account(account2.clone())
+                .with_target_account(account1.clone())
+                .with_money(Money::of(500))
+                .build(),
+        ]);
+        assert_eq!(Money::of(-500), window.calculate_balance(&account1));
+        assert_eq!(Money::of(500), window.calculate_balance(&account2));
+    }
+
+    fn start_date() -> NaiveDateTime {
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(2019, 8, 3).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+        )
+    }
+
+    fn in_between_date() -> NaiveDateTime {
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(2019, 8, 4).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+        )
+    }
+
+    fn end_date() -> NaiveDateTime {
+        NaiveDateTime::new(
+            NaiveDate::from_ymd_opt(2019, 8, 5).unwrap(),
+            NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+        )
+    }
+}

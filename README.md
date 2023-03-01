@@ -2,8 +2,8 @@
 
 Inspired by https://github.com/thombergs/buckpal
 
-Kotlin Version: https://github.com/schneidersteve/buckpal-kotlin
-Dart Version: https://github.com/schneidersteve/buckpal-dart
+- Kotlin Version: https://github.com/schneidersteve/buckpal-kotlin
+- Dart Version: https://github.com/schneidersteve/buckpal-dart
 
 ## Tech Stack
 

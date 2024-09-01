@@ -10,4 +10,4 @@ doctest = false
 num-bigint = "0.4"
 chrono = "0.4"
 # feature mockall
-mockall = { version = "0.11", optional = true }
+mockall = { version = "0.13", optional = true }

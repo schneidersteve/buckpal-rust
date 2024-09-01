@@ -16,5 +16,5 @@ mockall_double = "0.3"
 
 [dev-dependencies]
 domain = { version = "0.0.1", path = "../domain", features = ["mockall"] }
-mockall = "0.11"
+mockall = "0.13"
 async-std = { version = "1", features = ["attributes"] }

@@ -7,10 +7,10 @@ use persistence::{
     account_persistence_adapter::AccountPersistenceAdapter,
     account_repository::AccountRepositoryImpl, activity_repository::ActivityRepositoryImpl,
 };
+use rest::send_money_handler::{get_routes, set_dependencies};
 use salvo::prelude::*;
 use sqlx::{migrate, sqlite::SqlitePoolOptions, SqlitePool};
 use std::sync::Arc;
-use rest::send_money_handler::{get_routes, set_dependencies};
 
 #[tokio::main]
 async fn main() {
@@ -20,9 +20,8 @@ async fn main() {
     wire_dependencies(db_pool);
 
     println!("Server Running: http://127.0.0.1:8080");
-    Server::new(TcpListener::bind("127.0.0.1:8080"))
-        .serve(get_routes())
-        .await;
+    let acceptor = TcpListener::new("127.0.0.1:8080").bind().await;
+    Server::new(acceptor).serve(get_routes()).await;
 }
 
 async fn create_db_pool() -> SqlitePool {

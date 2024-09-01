@@ -27,7 +27,7 @@ async fn send_money(req: &mut Request, res: &mut Response) {
 
     SEND_MONEY_USE_CASE.get().unwrap().send_money(command).await;
 
-    res.set_status_code(StatusCode::OK);
+    res.status_code(StatusCode::OK);
 }
 
 #[cfg(test)]
@@ -65,7 +65,7 @@ mod tests {
         let status_code = TestClient::post("http://127.0.0.1:8080/accounts/send/41/42/500")
             .send(&service)
             .await
-            .status_code()
+            .status_code
             .unwrap();
 
         // Then

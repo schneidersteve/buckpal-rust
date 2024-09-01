@@ -9,7 +9,6 @@ dependencies = [
  "application",
  "domain",
  "mockall",
- "once_cell",
  "salvo",
  "tokio",
 ]

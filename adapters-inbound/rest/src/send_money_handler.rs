@@ -1,9 +1,10 @@
+use std::sync::OnceLock;
+
 use application::inbound_ports::{SendMoneyCommand, SendMoneyUseCase};
 use domain::{ar::account::AccountId, vo::money::Money};
-use once_cell::sync::OnceCell;
 use salvo::prelude::*;
 
-static SEND_MONEY_USE_CASE: OnceCell<Box<dyn SendMoneyUseCase>> = OnceCell::new();
+static SEND_MONEY_USE_CASE: OnceLock<Box<dyn SendMoneyUseCase>> = OnceLock::new();
 
 pub fn set_dependencies(smuc: Box<dyn SendMoneyUseCase>) {
     SEND_MONEY_USE_CASE.set(smuc).unwrap();

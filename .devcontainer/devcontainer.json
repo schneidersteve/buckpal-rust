@@ -3,7 +3,7 @@
 	"build": { "dockerfile": "Dockerfile" },
 	"customizations": {
 		"vscode": {
-		  "extensions": ["rust-lang.rust-analyzer", "vadimcn.vscode-lldb", "tamasfe.even-better-toml", "esbenp.prettier-vscode", "humao.rest-client"]
+		  "extensions": ["rust-lang.rust-analyzer", "vadimcn.vscode-lldb", "tamasfe.even-better-toml", "esbenp.prettier-vscode", "anweber.vscode-httpyac"]
 		}
 	  }
 }

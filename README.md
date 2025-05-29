@@ -55,6 +55,8 @@ Feature: Send Money
 
 > cargo run
 
+> cargo update
+
 > cargo install cargo-watch
 
 > cargo watch --clear -x "run"

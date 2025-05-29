@@ -7,10 +7,11 @@ edition = "2021"
 doctest = false
 
 [dependencies]
-domain = { version = "0.0.1", path = "../../domain" }
-application = { version = "0.0.1", path = "../../application" }
-salvo = { version = "0.71", features = ["test"] }
+domain = { workspace = true }
+application = { workspace = true }
+
+salvo = { workspace = true, features = ["test"] }
 
 [dev-dependencies]
-mockall = "0.13"
-tokio = { version = "1", features = ["macros"] }
+mockall = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }

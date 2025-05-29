@@ -9,12 +9,13 @@ resolver = "2"
 doctest = false
 
 [dependencies]
-domain = { version = "0.0.1", path = "../domain" }
-chrono = "0.4"
-async-trait = "0.1"
-mockall_double = "0.3"
+domain = { workspace = true }
+
+chrono = { workspace = true }
+async-trait = { workspace = true }
+mockall_double = { workspace = true }
 
 [dev-dependencies]
-domain = { version = "0.0.1", path = "../domain", features = ["mockall"] }
-mockall = "0.13"
-async-std = { version = "1", features = ["attributes"] }
+domain = { workspace = true, features = ["mockall"] }
+mockall = { workspace = true }
+async-std = { workspace = true, features = ["attributes"] }

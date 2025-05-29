@@ -6,3 +6,18 @@ members = [
     "adapters-outbound/persistence",
     "main",
 ]
+
+[workspace.dependencies]
+domain = { version = "0.0.1", path = "domain" }
+application = { version = "0.0.1", path = "application" }
+
+num-bigint = "0.4"
+chrono = "0.4"
+mockall = "0.13"
+async-trait = "0.1"
+mockall_double = "0.3"
+async-std = "1"
+sqlx = "0.8"
+log = "0.4"
+tokio = "1"
+salvo = "0.71"

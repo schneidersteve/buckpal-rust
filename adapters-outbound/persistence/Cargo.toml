@@ -7,13 +7,18 @@ edition = "2021"
 doctest = false
 
 [dependencies]
-domain = { version = "0.0.1", path = "../../domain" }
-application = { version = "0.0.1", path = "../../application" }
-chrono = "0.4"
-sqlx = { version = "0.8", features = [ "runtime-tokio-rustls", "sqlite", "chrono" ] }
-async-trait = "0.1"
-log = "0.4"
+domain = { workspace = true }
+application = { workspace = true }
+
+chrono = { workspace = true }
+sqlx = { workspace = true, features = [
+    "runtime-tokio-rustls",
+    "sqlite",
+    "chrono",
+] }
+async-trait = { workspace = true }
+log = { workspace = true }
 
 [dev-dependencies]
-mockall = "0.13"
-tokio = { version = "1", features = ["macros"] }
+mockall = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }

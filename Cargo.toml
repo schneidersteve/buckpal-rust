@@ -10,6 +10,8 @@ members = [
 [workspace.dependencies]
 domain = { version = "0.0.1", path = "domain" }
 application = { version = "0.0.1", path = "application" }
+rest = { package = "adapters-inbound-rest", version = "0.0.1", path = "adapters-inbound/rest" }
+persistence = { package = "adapters-outbound-persistence", version = "0.0.1", path = "adapters-outbound/persistence" }
 
 num-bigint = "0.4"
 chrono = "0.4"
@@ -21,3 +23,5 @@ sqlx = "0.8"
 log = "0.4"
 tokio = "1"
 salvo = "0.71"
+reqwest = "0.12"
+env_logger = "0.11"

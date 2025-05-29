@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/base:bookworm
 
-ARG RUST_VERSION=1.80.1
+ARG RUST_VERSION=1.87.0
 
 ENV RUSTUP_HOME=/home/vscode/.rustup
 ENV CARGO_HOME=/home/vscode/.cargo
